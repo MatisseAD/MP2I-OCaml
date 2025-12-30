@@ -10,3 +10,6 @@ let rbg : student = { (** Le ': student' est facultatif *)
   age = 18;
 }
 
+let name_with_year student =
+  match student with
+  | {name; classe; age} -> name ^ " " ^ classe ^ " " ^ string_of_int age
