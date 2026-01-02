@@ -24,3 +24,9 @@ let matisse = {
   hp = 500.;
   ptype = TWater
 }
+
+let kiki = {
+  name = "Kiki";
+  hp = 1000.;
+  ptype = TFire;
+}
