@@ -107,19 +107,57 @@ type genre = M |F
 type personne = {nom: string; prenom: string; age: int; sexe: genre} 
 type classe = personne array ;;
 
-
-
 (** Exercice 24 *)
 
 type nombre = Entier of int | Rationnel of int*int | Reel of float | Complexe of float*float
 
-let print_all_elements list = 
-  for i=0 to Array.length list do
-    print_int(list.(i));
-    print_newline();
-  done;;
+let rec print_all_elements list = 
+  match list with
+  | [x] -> 
+    print_string(" ");
+    print_int(x);
+  | h :: t ->  
+    print_string(" ");
+    print_int(h);
+    print_all_elements(t);
+  | [] -> print_string("")
 
 let rec print_all_nombre list = 
   match list with 
   | [] -> print_newline()
-  | h :: t -> if h =then 
+  | h :: t -> 
+    print_all_nombre(t);
+    print_string(" ");
+    match h with
+    | Entier x -> print_int(x)
+    | Rationnel (num, den) -> 
+      print_int(num); print_string("/"); print_int(den);
+    | Reel x -> print_float(x);
+    | Complexe (real, imaginary) -> print_float(real); print_string(" + i"); print_float(imaginary);
+
+
+(**let rec sommation liste f =
+  match liste with
+  | [] -> 0
+  | h :: t -> f h (sommation t f)**)
+
+(** Exercice 25 *)
+
+type arbre = Feuille of int | Noeud of int*arbre*arbre;;
+
+let rec minimum (tree : arbre) =
+  match tree with
+  | Noeud (x,f1,f2) -> 
+    if x <= minimum f1 && x <= minimum f2 then
+      x
+    else
+      if minimum f1 < minimum f2 then
+        minimum f1
+      else
+        minimum f2
+  | Feuille x -> x 
+
+let rec sommearbre (tree : arbre) : int =
+  match tree with
+  | Feuille x -> x
+  | Noeud (x, f1, f2) -> x + sommearbre(f1) + sommearbre(f2)
