@@ -65,6 +65,14 @@ u (9, 5, f);;
 (** Il faut faire attention à la valeur du rang*)
 
 (** Exercice 18 *)
+let base_to_dec (s: string) (b: int) : int =
+  let power = ref 1 in
+  let ans = ref 0 in
+  for i=String.length s - 1 downto 0 do
+    ans := !ans + int_of_string(String.make 1 (String.get s i)) * !power;
+    power := !power * b;
+  done;
+!ans;;
 
 (** Exercice 19 *)
 
