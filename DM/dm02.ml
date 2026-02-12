@@ -120,42 +120,25 @@ let drop_zero (n : nat) : nat =
 
   (** Q7 **)
 
- let add_z (z1 : z) (z2 : z) : z =
+let add_z (z1 : z) (z2 : z) : z =
   let res =
-    if z1.signe < 0 && z2.signe < 0 then
-      {signe = -1; nat = add_nat z1.nat z2.nat}
-    else if z1.signe > 0 && z2.signe > 0 then
-      {signe = 1; nat = add_nat z1.nat z2.nat}
-    else if cmp_nat z1.nat z2.nat > 0 then
-      {signe = z1.signe; nat = sous_nat z1.nat z2.nat}
-    else if cmp_nat z1.nat z2.nat < 0 then
-      {signe = z2.signe; nat = sous_nat z2.nat z1.nat}
+    if z1.signe = 0 then z2
+    else if z2.signe = 0 then z1
+    else if z1.signe = z2.signe then
+      {signe = z1.signe; nat = add_nat z1.nat z2.nat}
     else
-      {signe = 0; nat = []}
+      let c = cmp_nat z1.nat z2.nat in
+      if c > 0 then
+        {signe = z1.signe; nat = sous_nat z1.nat z2.nat}
+      else if c < 0 then
+        {signe = z2.signe; nat = sous_nat z2.nat z1.nat}
+      else
+        {signe = 0; nat = []}
   in
   { res with nat = drop_zero res.nat }
-;;
 
 let sous_z (z1 : z) (z2 : z) =
-  let res =
-    if z1.signe < 0 && z2.signe < 0 then
-      add_z z1 z2
-    else if z1.signe > 0 && z2.signe > 0 then
-      (if cmp_nat z1.nat z2.nat > 0 then
-        {signe = 1; nat = sous_nat z1.nat z2.nat}
-      else if cmp_nat z1.nat z2.nat < 0 then
-        {signe = -1; nat = sous_nat z2.nat z1.nat}
-      else
-        {signe = 0; nat = []})
-    else if cmp_nat z1.nat z2.nat > 0 then
-      {signe = z1.signe; nat = (add_z z1 z2).nat}
-    else if cmp_nat z1.nat z2.nat < 0 then
-      {signe = z2.signe * (-1); nat = sous_nat z2.nat z1.nat}
-    else
-      {signe = 0; nat = []}
-  in
-  { res with nat = drop_zero res.nat }
-;;
+  add_z z1 (neg_z z2) ;;
 
   (** Q8 **)
 
