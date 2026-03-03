@@ -44,6 +44,13 @@ let estsousliste l1 l2 =
     in
     aux l1 l2
 
+let rec listes_des_sous_listes l =
+  match l with
+  | [] -> [ [] ]
+  | t :: q ->
+      let n = listes_des_sous_listes q in
+      n @ List.map (fun l -> t :: l) n
+
 (**Exercice 3.4*)
 
 (**1. Code de Gray d'ordre 3
