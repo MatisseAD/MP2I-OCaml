@@ -128,23 +128,4 @@ let decomposition n =
 
 type croissant = C | D | N
 
-let rec decompose (l : int list) : int list list =
-  let rec aux l cpt cr =
-    match (l, cr) with
-    | x :: y :: ys, N ->
-        if x < y then aux ys ([ x; y ] @ cpt) (C : croissant)
-        else if x > y then aux ys ([ x; y ] @ cpt) (D : croissant)
-        else aux ys ([ x; y ] @ cpt) N
-    | x :: y :: ys, C ->
-        if x > y then [ cpt @ [ x ] ] else aux ys (cpt @ [ x ]) C
-    | x :: y :: ys, D ->
-        if x < y then [ cpt @ [ x ] ] else aux ys (cpt @ [ x ]) D
-    | _ ->  cpt 
-  in
-  let rec aux2 l (p : int list) lfs =
-    match l,p with
-    | x::xs,[] -> aux2 (l) (aux l [] N) (aux l [] N::lfs)
-    |x::xs,y::ys -> if x = y then
-      aux2 xs ys lfs
-    | 
-    
+(** Exercice 14 **)
