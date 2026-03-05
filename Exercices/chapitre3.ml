@@ -133,6 +133,33 @@ let decomposition n =
   in
   aux fibassocie 0 []
 
+(** Exerice 3.12 **)
+
 type croissant = C | D | N
 
+let decompose liste =
+  let rec aux encours atraiter resultat =
+    match atraiter with
+    | [] -> List.rev (List.rev encours :: resultat)
+    | x :: xs -> (
+        match encours with
+        | [] -> aux [ x ] xs resultat
+        | y :: _ ->
+            if x > y then aux (x :: encours) xs resultat
+            else aux [ x ] xs (List.rev encours :: resultat))
+  in
+  aux [] liste []
+
 (** Exercice 14 **)
+
+(** Exerice 3.15 **)
+
+let rec ajoute x collection =
+  match collection with [] -> [ [] ] | y :: ys -> (x :: y) :: ajoute x ys
+
+let rec parties ensemble =
+  match ensemble with
+  | [] -> [ [] ]
+  | x :: en ->
+      let p_en = parties en in
+      p_en @ ajoute x p_en
