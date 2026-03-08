@@ -301,6 +301,59 @@ cpt = 0 + 4 + 4 + 0 + 3 + 0 +0 + 1 + 0 => total d'inversions entre moitié gauch
   - Indication de programmation : On utilise une fonction auxiliare récursive qui tri la zone du tableau t[i;j[ et renvoie le nb d'inversions total dans cette zone du tableau
 *)
 
+let rec fusion arr1 arr2 =
+  let cpt = ref 0 in
+
+  let n1 = Array.length arr1 in
+  let n2 = Array.length arr2 in
+  let result = Array.make (n1 + n2) 0 in
+  let i = ref 0 in
+  let j = ref 0 in
+  let k = ref 0 in
+  while !i < n1 && !j < n2 do
+    if arr1.(!i) < arr2.(!j) then (
+      incr cpt;
+      result.(!k) <- arr1.(!i);
+      incr i
+    ) else (
+      result.(!k) <- arr2.(!j);
+      incr j
+    );
+    incr k
+  done;
+  while !i < n1 do
+    result.(!k) <- arr1.(!i);
+    incr i;
+    incr k
+  done;
+  while !j < n2 do
+    result.(!k) <- arr2.(!j);
+    incr j;
+    incr k
+  done;
+  (result,cpt)
+
+let div arr =
+  let n = Array.length arr in
+  let mid = n / 2 in
+  let left = Array.sub arr 0 mid in
+  let right = Array.sub arr mid (n - mid) in
+  (left, right)
+
+let rec inversion t =
+  let rec aux t cpt =
+    if Array.length t = 0 || Array.length t = 1 then
+      (t,0)
+    else
+      let a,b = div t in
+      let c = aux a cpt in
+      let d = aux b cpt in
+      let e,f = fusion (fst c) (fst d) in
+      (e,!f)
+    in aux t 0
+
+
+
 (** Exerice 2.27 **)
 
 (** Dans un échéquier n*n, on cherche à placer n reines de sorte qu'aune reine
