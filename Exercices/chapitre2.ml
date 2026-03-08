@@ -333,3 +333,78 @@ cpt = 0 + 4 + 4 + 0 + 3 + 0 +0 + 1 + 0 => total d'inversions entre moitié gauch
     in solution_a_partir_de 0 sol
 
     **)
+
+(**Exercice 2.25 *)
+
+(**Elements majoritaires *)
+
+let majoritaire (t : 'a array) : bool * 'a * int =
+  (** Variables de réponses "finales" *)
+  let ans_bool = ref false in
+  let value_ocur = ref (-1) in
+  let nb_ocur = ref 0 in
+  (**Fin de variables réponses finales*)
+  let n = Array.length t in
+  let max_v = ref t.(0) in
+  (**H(0) est vrai, le tableau nul ne possède pas de vlauer*)
+  for i=0 to n - 1 do
+    (** Supposons H(i)*)
+    if t.(i) > !max_v then
+      max_v := t.(i)
+    (** H(i+1) est vrai*)
+  done;
+  let t_aux = Array.make !max_v 0 in
+  for i=0 to n-1 do
+    (** Supposons H(i)*)
+    t_aux.(t.(i)-1) <- t_aux.(t.(i)-1) + 1;
+    (** H(i+1) est vrai*)
+  done;
+  let i = ref 0 in
+  (** La boucle while termine, i est un variant de boucle, c'est un entier, majoré, qui est incrémenter de 1 à chaque itération.*)
+  while not (!ans_bool) && i < max_v do
+    (** Supposons H(i)*)
+    if t_aux.(!i) > n/2 then
+      ans_bool := true;
+      value_ocur := !i;
+      nb_ocur := t_aux.(!i);
+    incr i;
+    (** H(i+1) est vrai*)
+    done; 
+    if !ans_bool then
+      (!ans_bool, !value_ocur +1, !nb_ocur)
+    else
+      (!ans_bool,-1,0)
+
+(** Montrons que cette fonction termine et renvoie bien la bonne valeur 
+
+H(i) : "La variable 'ans_bool' est vrai si le tableau t_aux possède une valeur supérieur à n/2, faux sinon"
+
+*)
+
+(** Complexité C(n) où n est la taille du tableau t 
+
+1ère boucle for :
+
+C(n) = O(n)
+
+2ème boucle for allant de 0 jusqu'au max de la valeur contenu dans le tableau t
+
+C(n) = O(max(t)) où max représente la valeur maximal
+
+3ème boucle while
+
+C(n) = O(max(t))
+
+Donc,
+
+C(n) = 2O(max(t)) + O(n)
+
+Si max(t) > O(n),
+
+C(n) = O(max(t))
+
+Sinon,
+
+C(n) = O(n)
+
+*)
