@@ -301,7 +301,7 @@ cpt = 0 + 4 + 4 + 0 + 3 + 0 +0 + 1 + 0 => total d'inversions entre moitié gauch
   - Indication de programmation : On utilise une fonction auxiliare récursive qui tri la zone du tableau t[i;j[ et renvoie le nb d'inversions total dans cette zone du tableau
 *)
 
-let rec fusion arr1 arr2 =
+let fusion arr1 arr2 =
   let cpt = ref 0 in
 
   let n1 = Array.length arr1 in
@@ -327,6 +327,7 @@ let rec fusion arr1 arr2 =
     incr k
   done;
   while !j < n2 do
+    incr cpt;
     result.(!k) <- arr2.(!j);
     incr j;
     incr k
@@ -442,7 +443,7 @@ C(n) = O(n)
 
 2ème boucle for allant de 0 jusqu'au max de la valeur contenu dans le tableau t
 
-C(n) = O(max(t)) où max représente la valeur maximal
+C(n) = O(max(t)) où max représente la valeur maximale
 
 3ème boucle while
 
@@ -459,5 +460,6 @@ C(n) = O(max(t))
 Sinon,
 
 C(n) = O(n)
+
 
 *)
