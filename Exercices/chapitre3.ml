@@ -154,8 +154,12 @@ let decompose liste =
 
 (** Exerice 3.15 **)
 
+(** 1 **)
+
 let rec ajoute x collection =
   match collection with [] -> [ [] ] | y :: ys -> (x :: y) :: ajoute x ys
+
+(** 2 **)
 
 let rec parties ensemble =
   match ensemble with
@@ -163,3 +167,22 @@ let rec parties ensemble =
   | x :: en ->
       let p_en = parties en in
       p_en @ ajoute x p_en
+
+let rec combinaison p ensemble =
+  match ensemble with
+  | [] when p = 0 -> [ [] ]
+  | [] -> []
+  | x :: xs -> combinaison p xs @ ajoute x (combinaison (p - 1) xs)
+
+let rec pop_ieme (i : int) (liste : 'a list) : int * 'a list =
+  match (liste, i) with
+  | [], _ -> failwith "Impossible"
+  | x :: xs, 0 -> (x, xs)
+  | x :: xs, p when p > 0 ->
+      let a, b = pop_ieme (p - 1) xs in
+      (a, x :: b)
+  | _, _ -> failwith "Impossible"
+
+(** Programmation de la question des surjections
+
+    **)

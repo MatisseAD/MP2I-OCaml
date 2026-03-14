@@ -463,3 +463,41 @@ C(n) = O(n)
 
 
 *)
+
+(**Autres méthodes possibles pour 
+
+1. Naif : maximum de la liste du nombres d'occurences, O(n^2)
+
+2. Pour un tableaux d'entiers : on crée le tableau des occurences des elts de t
+  - 1° parcours pour trouver max(t)
+  - 2° on crée un tableau occ de taille max(t)+1
+  - 3° on reparcourt t et on incrémente la case occ.(t.(i)) pour tout 0 <= i <= len(t) -1
+ O(n+max(t)). Adaptable aux types de donnees avec un dctionnaire associant objets et indice entier
+
+3.  On trie le tableaupuis avec un parcours on recherche ensuite l'elt majoritaire en O(n*ln(n))
+
+4. METHODE DE BOYER MOORE A RETENIR
+
+Rque : si a et b st deux elts de tq a != b :
+Rechercher un elt maj de t <-> rechercher u nelt maj dans le tableau obtenu 
+à partir de t en supprimant a et b (ie les paires distinctes)
+
+ALGO: On parcourt t
+  - Si t.(i) = sommet de la pile // pile est vide -> on empile t.(i)
+  - Sinon : on dépile un elt de la pile
+Si à la fin la pile est non vide, le sommet est de la pile est le seul majoirtaire possible
+
+/!!\ L'elt restant n'est pas forcement majoritaire (ex : plusieurs elts qui occurent le mm nb de fois)
+MAIS si il y a un elt maj, c'est le seul qui resiste et reste present au final dans la pile.
+Il reste à tester son nb d'occurences.
+
+Implémentation :
+pour coder la pile il nous suffit de connaitre la variable h = hauteur de la pile; cord = seule valeur qui est dans la pile
+Iteration :
+  - si h = 0 alors h devient 1 et cord devient t.(i)
+  - si h != 0 et t.(i) = cord alors h devient h+1
+  - si h != 0 et t.(i) != cord alors h devient h-1
+ 
+=> complexite O(n)
+
+**)
