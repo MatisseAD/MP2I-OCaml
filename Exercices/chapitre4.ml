@@ -152,3 +152,7 @@ let tas_to_list (t : 'a tasmin) : 'a list =
   aux []
 
 type 'a fileprio = (int * 'a) tasmin
+
+(** Exercice 4.3 *)
+
+type graphe = int list array

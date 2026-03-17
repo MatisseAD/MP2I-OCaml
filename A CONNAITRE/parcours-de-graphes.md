@@ -27,7 +27,7 @@ WHILE le sac n'est pas vide
 
 __**Exemple sur le graphe**__ :
 
-## Parcours en largeur (BFS) du graphe
+### Parcours en largeur (BFS) du graphe
 
 ## Initialisation
 
@@ -162,3 +162,18 @@ __**Exemple sur le graphe**__ :
 ## Ordre final du parcours
 
 S → A → B → D → E → F → G
+
+### Version fonctionnelle du parcours en largeur (BFS)
+
+On utilise une fonction récursive qui parcourt sommet S et tout les vois de S non encore traités.
+
+```
+parcourt(s) =
+  SI S a déjà été traité
+    On fait rien
+  SINON
+    On ajoute S à la structure des sommets traités
+    On applique f à S
+    POUR TOUS les voisins V de S
+      parcourt(V)
+```
