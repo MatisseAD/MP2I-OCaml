@@ -2,15 +2,9 @@
 
 On veut appliquer une fonction f à tous les sommets d'un graphe (connexe)
 
-Exemple de graphe :
+__Exemple de graphe__ :
 
-```
-   A
-  / \
- B   C
-  \ /
-   D
-```
+![alt text](image.png){width=400px height=300px}
 
 ## Algo générique de parcours
 
@@ -30,3 +24,141 @@ WHILE le sac n'est pas vide
   SINON
     Passer au sommet suivant (On fait rien)
 ```
+
+__**Exemple sur le graphe**__ :
+
+## Parcours en largeur (BFS) du graphe
+
+## Initialisation
+
+- __File__ : [S]  
+- __Visités__ : []
+
+---
+
+## Étapes détaillées
+
+### Étape 1
+
+- File avant : [S]  
+- Sommet pris : S  
+- Action : visiter S, ajouter A, B, D  
+
+- __File après__ : [A, B, D]  
+- __Visités__ : [S]
+
+---
+
+### Étape 2
+
+- File avant : [A, B, D]  
+- Sommet pris : A  
+- Action : visiter A, ajouter B, E  
+
+- __File après__ : [B, D, B, E]  
+- __Visités__ : [S, A]
+
+---
+
+### Étape 3
+
+- File avant : [B, D, B, E]  
+- Sommet pris : B  
+- Action : visiter B, ajouter E, F  
+
+- __File après__ : [D, B, E, E, F]  
+- __Visités__ : [S, A, B]
+
+---
+
+### Étape 4
+
+- File avant : [D, B, E, E, F]  
+- Sommet pris : D  
+- Action : visiter D, ajouter B, F  
+
+- __File après__ : [B, E, E, F, B, F]  
+- __Visités__ : [S, A, B, D]
+
+---
+
+### Étape 5
+
+- File avant : [B, E, E, F, B, F]  
+- Sommet pris : B  
+- Action : déjà visité → rien  
+
+- __File après__ : [E, E, F, B, F]  
+- __Visités__ : [S, A, B, D]
+
+---
+
+### Étape 6
+
+- File avant : [E, E, F, B, F]  
+- Sommet pris : E  
+- Action : visiter E, ajouter G  
+
+- __File après__ : [E, F, B, F, G]  
+- __Visités__ : [S, A, B, D, E]
+
+---
+
+### Étape 7
+
+- File avant : [E, F, B, F, G]  
+- Sommet pris : E  
+- Action : déjà visité → rien  
+
+- __File après__ : [F, B, F, G]  
+- __Visités__ : [S, A, B, D, E]
+
+---
+
+### Étape 8
+
+- File avant : [F, B, F, G]  
+- Sommet pris : F  
+- Action : visiter F  
+
+- __File après__ : [B, F, G]  
+- __Visités__ : [S, A, B, D, E, F]
+
+---
+
+### Étape 9
+
+- File avant : [B, F, G]  
+- Sommet pris : B  
+- Action : déjà visité → rien  
+
+- __File après__ : [F, G]  
+- __Visités__ : [S, A, B, D, E, F]
+
+---
+
+### Étape 10
+
+- File avant : [F, G]  
+- Sommet pris : F  
+- Action : déjà visité → rien  
+
+- __File après__ : [G]  
+- __Visités__ : [S, A, B, D, E, F]
+
+---
+
+### Étape 11
+
+- File avant : [G]  
+- Sommet pris : G  
+- Action : visiter G  
+
+- __File après__ : []  
+- __Visités__ : [S, A, B, D, E, F, G]
+
+---
+
+## Ordre final du parcours
+
+S → A → B → D → E → F → G
