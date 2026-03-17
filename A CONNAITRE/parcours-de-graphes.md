@@ -177,3 +177,24 @@ parcourt(s) =
     POUR TOUS les voisins V de S
       parcourt(V)
 ```
+
+## Algo de kruskal
+
+Fabrication d'un arbre couvrant minimal.
+
+Entrée : Un graphe valué connexe non orienté
+
+![alt text](image-1.png)
+
+Sortie : Arbre couvrant minimal = graphe connexe minimal contenant tous les sommets de G (et une sélécton bien choisie des arêtes de G)
+
+__**Algo**__ :
+
+```
+TANT QUE le graphe est en fabrication (= n'est pas connexe)
+  On choisit une arête de poids minimal
+  SI cette arête sert à qqchose (c'est à dire que les deux sommets de cette arête ne sont pas déjà connectés dans le graphe en fabrication, donc pas encore dans la composante connexe)
+    On ajoute cette arête au graphe en fabrication
+  SINON
+    On fait rien
+```

@@ -156,3 +156,54 @@ type 'a fileprio = (int * 'a) tasmin
 (** Exercice 4.3 *)
 
 type graphe = int list array
+
+let degre g i =
+  let l = g.(i) in
+  List.length l
+
+let degre_max g =
+  let max = ref (degre g 0) in
+  for i = 1 to Array.length g - 1 do
+    if !max < degre g i then max := degre g i
+  done;
+  !max
+
+let composante_connexe g s =
+  let queue = Queue.create () in
+  let stack = Stack.create () in
+  let deja_vu = Array.make (Array.length g) false in
+  let f x = Queue.push x queue in
+  let check_if_deja_vu x =
+    if not deja_vu.(x) then Stack.push x stack;
+    deja_vu.(x) <- true
+  in
+  List.iter f g.(s);
+  let rec aux q =
+    if Queue.is_empty q then pile_to_liste stack
+    else
+      let to_treat = Queue.pop q in
+      List.iter check_if_deja_vu g.(to_treat);
+      aux q
+  in
+  aux queue
+
+let accessible g i j =
+  let l = composante_connexe g i in
+  let ans = ref false in
+  let rec aux l =
+    match l with
+    | [] -> ()
+    | x :: xs ->
+        if x = j then begin
+          ans := true;
+          aux xs
+        end
+        else aux xs
+  in
+  aux l;
+  !ans
+
+(** On a écrit un parcourt en largeur, effectuons un parcours en profondeur *)
+
+let composante_connexe_pronfondeur g s =
+  
