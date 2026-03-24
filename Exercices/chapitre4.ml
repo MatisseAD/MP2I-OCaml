@@ -274,4 +274,53 @@ let liste_copains (comp : compo) (som : sommet) : sommet list =
     l'array *)
 
 (**let composantes (g : graphe) : int array = let t = Array.make (List.length g)
-   0 in let rec aux arrete = match arrete with | [] -> t | x :: xs -> **)
+   0 in let rec aux arrete = match arrete with | [] -> t | x :: xs ->**)
+
+(** Exercice 4.6 *)
+
+type sommet = int
+type unionfind = { pere : sommet array; hauteur : int array }
+
+let chacun_pour_soi (n : int) : unionfind =
+  let papa = Array.make n 0 in
+  let size = Array.make n 0 in
+  for i = 0 to n - 1 do
+    papa.(i) <- i
+  done;
+  { pere = papa; hauteur = size }
+
+let rec racine (s : sommet) (uf : unionfind) : sommet =
+  let papa = uf.pere in
+  if papa.(s) = s then s else racine papa.(s) uf
+
+let est_relie (s : sommet) (sp : sommet) (uf : unionfind) : bool =
+  let r1 = racine s uf in
+  let r2 = racine sp uf in
+  r1 = r2
+
+let fusionne (s : sommet) (sp : sommet) (uf : unionfind) : unit =
+  let papa = uf.pere in
+  let h = uf.hauteur in
+  if h.(s) > h.(sp) then (
+    let oldr = racine sp uf in
+    let newr = racine s uf in
+    papa.(oldr) <- newr;
+    h.(oldr) <- 0;
+    h.(sp) <- h.(sp) + 1)
+  else
+    let oldr = racine s uf in
+    let newr = racine sp uf in
+    papa.(oldr) <- newr;
+    h.(oldr) <- 0;
+    h.(sp) <- h.(sp) + 1
+
+let g1 = chacun_pour_soi 10;;
+
+fusionne 0 1 g1;;
+fusionne 1 2 g1;;
+fusionne 2 3 g1;;
+fusionne 3 4 g1;;
+fusionne 5 6 g1;;
+fusionne 7 8 g1;;
+fusionne 5 7 g1;;
+g1
