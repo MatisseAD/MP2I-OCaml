@@ -169,23 +169,25 @@ let degre_max g =
   !max
 
 let composante_connexe g s =
-  let queue = Queue.create () in
-  let stack = Stack.create () in
+  let q = Queue.create () in
   let deja_vu = Array.make (Array.length g) false in
-  let f x = Queue.push x queue in
-  let check_if_deja_vu x =
-    if not deja_vu.(x) then Stack.push x stack;
-    deja_vu.(x) <- true
+  let resultat = ref [] in
+  let enfiler x =
+    if not deja_vu.(x) then begin
+      deja_vu.(x) <- true;
+      Queue.push x q;
+      resultat := x :: !resultat
+    end
   in
-  List.iter f g.(s);
-  let rec aux q =
-    if Queue.is_empty q then pile_to_liste stack
+  enfiler s;
+  let rec aux () =
+    if Queue.is_empty q then !resultat
     else
-      let to_treat = Queue.pop q in
-      List.iter check_if_deja_vu g.(to_treat);
-      aux q
+      let courant = Queue.pop q in
+      List.iter enfiler g.(courant);
+      aux ()
   in
-  aux queue
+  aux ()
 
 let accessible g i j =
   let l = composante_connexe g i in
@@ -205,5 +207,71 @@ let accessible g i j =
 
 (** On a écrit un parcourt en largeur, effectuons un parcours en profondeur *)
 
-let composante_connexe_pronfondeur g s =
-  
+let profParcours g s =
+  let dejaVu = Array.make (Array.length g) false in
+  dejaVu.(s) <- true;
+  let rec aux (l : int list) (ans : int list) =
+    match l with
+    | [] -> ans
+    | x :: xs ->
+        if not dejaVu.(x) then begin
+          dejaVu.(x) <- true;
+          aux (g.(x) @ xs) (x :: ans)
+        end
+        else aux xs ans
+  in
+  aux g.(s) [ s ]
+
+let graphe_iter f g i =
+  let composante = profParcours g i in
+  List.iter f composante
+
+let affiche g i =
+  let f x =
+    print_int x;
+    print_newline ()
+  in
+  graphe_iter f g i
+
+(** Exercice 4.5 *)
+
+type sommet = int
+type arete = int * sommet * sommet
+type graphe = arete list
+type compo = int array
+
+let est_copain comp som1 som2 = comp.(som1) = comp.(som2)
+
+let fusion comp som1 som2 =
+  if not (est_copain comp som1 som2) then
+    let n = Array.length comp in
+    if comp.(som1) < comp.(som2) then begin
+      let pivot = comp.(som2) in
+      for i = 0 to n - 1 do
+        if est_copain comp pivot i then comp.(i) <- comp.(som1)
+      done
+    end
+    else begin
+      let pivot = comp.(som1) in
+      for i = 0 to n - 1 do
+        if est_copain comp pivot i then comp.(i) <- comp.(som2)
+      done
+    end
+
+let liste_copains (comp : compo) (som : sommet) : sommet list =
+  let rec aux (i : int) (ans : sommet list) =
+    match i with
+    | 0 -> ans
+    | _ ->
+        if est_copain comp comp.(som) comp.(i) && som <> i then
+          aux (i - 1) (comp.(i) :: ans)
+        else aux (i - 1) ans
+  in
+  aux (Array.length comp - 1) []
+
+(** Complexité de est compain : O(1) => Comparaison Complexité de fusion : O(n)
+    => Parcours de l'array Coplexité de liste copains : O(n) => Parcours de
+    l'array *)
+
+(**let composantes (g : graphe) : int array = let t = Array.make (List.length g)
+   0 in let rec aux arrete = match arrete with | [] -> t | x :: xs -> **)
