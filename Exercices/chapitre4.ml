@@ -323,4 +323,14 @@ fusionne 3 4 g1;;
 fusionne 5 6 g1;;
 fusionne 7 8 g1;;
 fusionne 5 7 g1;;
-g1
+g1;;
+
+type 'a sommet = {
+  valeur : 'a;
+  mutable pere : 'a sommet option;
+  mutable hauteur : int;
+}
+
+let make_set a = { valeur = a; pere = None; hauteur = 0 }
+let rec find s = match s.pere with Some a -> find a | None -> s
+let unis s1 s2 = find s1 = find s2
