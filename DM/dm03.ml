@@ -106,3 +106,35 @@ let rec assoc (x : 'a) (q : ('a*'b) list) =
       b
     else
       assoc x t
+
+
+type ('a, 'b) table_hachage = { hache : 'a -> int; donnees : ('a*'b) list array; largeur : int}
+
+type ('a, 'b) table_dyn = {hache : int -> 'a -> int; mutable taille: int; mutable donnes : ('a*'b) list array; mutable largeur : int}
+
+let rec concatenate l1 l2 =
+  match l1,l2 with
+  | x::t,_ -> x :: concatenate t l2
+  | [],x::t -> x :: concatenate [] t
+  | [],[] -> []
+
+let rearrange_dyn t w2 =
+  let rec aux i l =
+    if i = t.largeur then
+      l
+    else
+      aux (i+1) (concatenate t.donnes.(i) l)
+    in 
+    let atrier = aux 0 [] in
+    let tableau = Array.make w2 [] in
+    let rec aux2 l =
+      match l with
+      | [] -> ()
+      | (k,e)::tail ->
+        let i = t.hache w2 k in
+        tableau.(i) <- (k,e) :: tableau.(i);
+        aux2 tail
+      in 
+      let _ = aux2 atrier in
+      t.donnes <- tableau;
+      t.taille <- w2

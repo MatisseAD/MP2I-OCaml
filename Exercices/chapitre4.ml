@@ -334,3 +334,5 @@ type 'a sommet = {
 let make_set a = { valeur = a; pere = None; hauteur = 0 }
 let rec find s = match s.pere with Some a -> find a | None -> s
 let unis s1 s2 = find s1 = find s2
+
+(** Exercice 4.10 *)
