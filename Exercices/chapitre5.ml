@@ -1,7 +1,5 @@
 (** ptitexo 15 **)
 
-[@@@warning "-8"]
-
 type 'a arbre = Vide | N of 'a arbre * 'a * 'a arbre
 type sens = Droite | Gauche
 
@@ -200,3 +198,146 @@ let ppac (a : arbre) (n1 : int) (n2 : int) : int option =
         | [], _ -> ans
       in
       aux l1 l2 None
+
+(** Exercice 2*)
+
+type arbre = Vide | Noeud of int * arbre list
+
+let vide (a : arbre) : bool = a = Vide
+
+let racine (a : arbre) : int =
+  if vide a then failwith "N.A"
+  else
+    let (Noeud (x, _)) = a in
+    x
+
+let fils (a : arbre) : arbre list =
+  if vide a then failwith "N.A"
+  else
+    let (Noeud (_, ls)) = a in
+    ls
+
+let fusion_arbre (a1 : arbre) (a2 : arbre) : arbre =
+  match (a1, a2) with
+  | Vide, _ -> a2
+  | _, Vide -> a1
+  | Noeud (r1, f1), Noeud (r2, f2) ->
+      if r1 >= r2 then Noeud (r2, Noeud (r1, f1) :: f2)
+      else Noeud (r1, Noeud (r2, f2) :: f1)
+
+(** P(k) : "Montrons par récurrence que la racine d'un arbre binomial d'ordre k
+    possède excatement k fils."
+
+    Initialisation : Soit t un arbre binomial d'ordre 0. Alors, t est soit
+    l'abre vide, soit un noeud sans fils. Dans les deux cas, il ne possède pas
+    de fils. Donc t possède exactement 0 fils.
+
+    Récurrence : Supposons que P(k) soit vraie. Montrons que P(k+1) l'est aussi.
+    Soit t un arbre d'ordre binomiale d'ordre k. Alors, on a la liste
+    [tk,...,t0] qui est la liste de ses fils. De plus, tk est d'ordre k-1, de
+    même, [tk-1,...,t0] est une arbre d'ordre k-1. Donc en tout, t possède k+1
+    fils. D'ou H(k+1) vraie. *)
+let ordre (a : arbre) : int =
+  let rec aux (l : arbre list) (cpt : int) : int =
+    match l with [] -> cpt | x :: xs -> aux xs cpt + 1
+  in
+  let (Noeud (_, fils)) = a in
+  aux fils 0
+
+(** Par récurrence
+
+    Initiatisation : Ordre 0, un noeud donc 2^0 = 1. Donc p(0) vraie
+
+    HD : SQ t est un ardre d'ordre k, alors il possède 2^k noeuds car P(k) est
+    vraie. Soit t', un arbre binomiale d'ordre k+1. Alors, il possède k fils,
+    donc [tk] possède 2^k noeuds et [tk-1,...,t0] possède 2^k noeuds. Comme t'
+    résulte de la fusion de ces deux arbres, alors t' = 2^k*2 = 2^k+1. *)
+let rec autres_arbres_ordre (a : arbre list) =
+  let rec aux (l : arbre list) (cpt : int) : int =
+    match l with [] -> cpt | x :: xs -> aux xs (cpt + ordre x)
+  in
+  aux a 0
+
+let rec autres_arbres_ordre (a : arbre list) : int =
+  match a with [] -> 0 | x :: xs -> ordre x + autres_arbres_ordre xs
+
+let rec est_arbre_binomial (a : arbre) : bool =
+  match a with
+  | Vide -> false
+  | Noeud (_, []) -> true
+  | Noeud (r, fils) -> (
+      match fils with
+      | [] -> true
+      | f1 :: f2 -> (
+          match f1 with
+          | Vide -> false
+          | Noeud (r1, _) ->
+              ordre f1 = ordre a - 1
+              && r1 >= r
+              && ordre a = autres_arbres_ordre f2 + 1
+              && autres_arbres_binomiale fils))
+
+and autres_arbres_binomiale (a : arbre list) : bool =
+  match a with
+  | [] -> true
+  | x :: xs -> est_arbre_binomial x && autres_arbres_binomiale xs
+
+(** Tas binomiaux *)
+
+type tas = arbre list
+
+(** 6.
+
+    On récupère tout les arbres non vide de la liste et on fait un tableau de
+    booléens ayant la même longeur que T. On met true pour tout arbre binomiale
+    non vide de T à la position k. Puis, on somme en fonction du tableau de
+    booléens i.e. si a la position i c'est true, on rajoute 2^i à la somme.
+
+    Ntot = Sum(si*2^i) *)
+
+let rec minimum_tas (t : tas) : int =
+  match t with
+  | a :: arbres ->
+      if a = Vide then minimum_tas arbres
+      else
+        let (Noeud (r, _)) = a in
+        min r (minimum_tas arbres)
+  | [] -> max_int
+
+let insertion (p : int) (t : tas) : tas =
+  let a = Noeud (p, []) in
+  let newT = a :: t in
+  let rec aux (t : tas) =
+    match t with
+    | x :: y :: xs ->
+        if ordre x = ordre y then
+          let newP = fusion_arbre x y in
+          let newOrdre = ordre newP in
+          aux2 newP newOrdre xs
+        else x :: aux (y :: xs)
+    | [] -> []
+    | [ x ] -> t
+  and aux2 (a : arbre) (o : int) (t : tas) : tas =
+    match (t, o) with
+    | [], 0 -> [ a ]
+    | x :: xs, 0 -> aux (a :: t)
+    | x :: xs, _ -> x :: aux2 a (o - 1) xs
+    | [], _ -> Vide :: aux2 a (o - 1) []
+  in
+  aux newT
+
+(**
+
+Complexité : O(n)
+
+*)
+
+(** Principe algorithmique de l'extraction du minium : 
+
+On séléctionne d'abord le tas qui contient le minimum, ensuite, on pop le minimum puis on fusionne tout les fils de ce minimum, enfin on renvoie le nouvel arbre
+
+*)
+
+let extraire_minimum (t : tas) :(int*tas) =
+  let a = minimum_tas t in
+  
