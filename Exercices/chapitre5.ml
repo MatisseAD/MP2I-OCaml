@@ -98,6 +98,35 @@ let chemin (a : arbre) (x : int) : int list option =
 (**let chemins (a : arbre) (x : int) : int list list = if nb_occurrences a x < 2
    then match (chemin a x) with | None -> [[]] | Some p -> [p] else**)
 
+let rec chemins a x : int list option =
+  if not (contient a x) then None
+  else
+    let rec aux a (ans : int list option) = 
+      match a with
+      | Vide -> None
+      | Noeud (y, arbs) ->
+        if y = x then
+          match ans with
+          | None -> Some [y]
+          | Some a -> Some (y :: a)
+        else
+          match ans with
+          | None -> 
+            autres_arabs arbs x (Some [y])
+          | Some a -> autres_arabs arbs x (Some (y :: a))
+    and autres_arabs a x ans =
+      match a with
+      | [] -> None
+      | y :: ys ->
+        match aux y ans with
+        | Some p -> Some p
+        | None -> autres_arabs ys x ans
+      in 
+      let w = aux a None in
+      match w with
+      | None -> None
+      | Some a -> Some (List.rev a)
+
 let rec feuilles (a : arbre) : int list =
   match a with
   | Vide -> []
