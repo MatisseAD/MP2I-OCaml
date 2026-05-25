@@ -202,19 +202,107 @@ let cout (i : int) (j : int) (tab_lg : int array) (lg : int) =
     if i > j then 0
     else if tab_lg.(i) + cpt > j then
       let space = lg - cpt in
-      aux 0 cpt + space * space
+      aux 0 cpt + (space * space)
     else aux (i + 1) (cpt + tab_lg.(i))
   in
   aux i 0
 
-(** Formule de récurrence d(i) 
+(** Formule de récurrence d(i) *)
 
+(** Exercice 6.5.2 *)
 
+(** Exercice 6.5.5 *)
 
-*)
+let min3 a b c = min (min a b) c
+let f c1 c2 = if c1 = c2 then 0 else if c1 = ' ' || c2 = ' ' then 1 else 1
 
-let rec calcul_d_min (i : int) (tab_lg : int array) (lg : int) : int =
-  if i = Array.length tab_lg then
-     0
-  else
-    
+let bestscore u v f =
+  let n = String.length u in
+  let m = String.length v in
+  let s = Array.make_matrix n m 0 in
+  s.(0).(0) <- 0;
+  for j = 1 to m - 1 do
+    s.(0).(j) <- s.(0).(j - 1) + 1
+  done;
+  for i = 1 to n - 1 do
+    s.(0).(i) <- 1 + s.(0).(i - 1)
+  done;
+  for i = 1 to n - 1 do
+    for j = 1 to m - 1 do
+      let a = s.(i - 1).(j - 1) + f u.[i - 1] v.[j - 1]
+      and b = s.(i).(j - 1) + f ' ' v.[j - 1]
+      and c = s.(i - 1).(j) + f u.[i - 1] ' ' in
+      s.(i).(j) <- min3 a b c
+    done
+  done;
+  s.(n - 1).(m - 1)
+
+let meilleur_PD u v =
+  let n = String.length u in
+  let m = String.length v in
+  let s = Array.make_matrix n m 0 in
+  let so = Array.make_matrix n m 0 in
+  s.(0).(0) <- 0;
+  for j = 1 to m - 1 do
+    s.(0).(j) <- s.(0).(j - 1) + 1
+  done;
+  for i = 1 to n - 1 do
+    s.(0).(i) <- 1 + s.(0).(i - 1)
+  done;
+  for i = 1 to n - 1 do
+    for j = 1 to m - 1 do
+      let a = s.(i - 1).(j - 1) + f u.[i - 1] v.[j - 1]
+      and b = s.(i).(j - 1) + f ' ' v.[j - 1]
+      and c = s.(i - 1).(j) + f u.[i - 1] ' ' in
+      s.(i).(j) <- min3 a b c
+    done
+  done;
+  s.(n - 1).(m - 1)
+
+(** Lignes d'horizon *)
+
+type immeuble = int * int * int
+type ville = immeuble list
+type horizon = (int * int) list
+
+let immeuble_to_hor (im : immeuble) : horizon =
+  let deb, haut, fin = im in
+  [ (deb, haut) ]
+
+let compare (im1 : immeuble) (im2 : immeuble) : int =
+  match (im1, im2) with
+  | (g1, h1, d1), (g2, h2, d2) ->
+      if g1 > g2 then 1 else if g1 < g2 then -1 else 0
+
+let skyline (v : ville) : horizon =
+  let n = List.length v in
+  let vnew = List.sort compare v in
+  let rec aux (current : immeuble) (i : int) (v : ville) (hor : horizon) :
+      horizon =
+    if i = n then hor
+    else
+      match v with
+      | [] -> hor
+      | x :: xs ->
+          let g, h, d = x in
+          let gc, hc, dc = current in
+          if hc < h then aux (g, h, d) (i + 1) xs (immeuble_to_hor x @ hor)
+          else if dc = i then aux x (i + 1) xs hor
+          else if current = [] then
+          else aux current (i + 1) xs hor
+  in
+  let ans = aux (0, 0, 0) 0 vnew [] in
+  List.rev ans
+
+let cas_vide : ville = []
+let cas_unique : ville = [ (2, 10, 9) ]
+let cas_disjoints : ville = [ (1, 5, 3); (5, 8, 8) ]
+let cas_adjacents_A : ville = [ (1, 4, 3); (3, 7, 6) ]
+let cas_adjacents_B : ville = [ (1, 7, 3); (3, 4, 6) ]
+let cas_fusion_hauteur : ville = [ (1, 5, 3); (3, 5, 6) ]
+let cas_cache_total : ville = [ (1, 10, 8); (3, 5, 6) ]
+let cas_escalier : ville = [ (1, 4, 5); (3, 8, 7) ]
+let cas_trou_milieu : ville = [ (1, 5, 10); (4, 12, 7) ]
+
+let crash_test : ville =
+  [ (2, 10, 9); (3, 5, 7); (8, 12, 12); (10, 12, 15); (19, 8, 22) ]
