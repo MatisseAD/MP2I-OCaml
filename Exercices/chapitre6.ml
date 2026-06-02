@@ -259,40 +259,57 @@ let meilleur_PD u v =
   done;
   s.(n - 1).(m - 1)
 
+type immeuble = int * int * int
 (** Lignes d'horizon *)
 
-type immeuble = int * int * int
 type ville = immeuble list
 type horizon = (int * int) list
 
-let immeuble_to_hor (im : immeuble) : horizon =
-  let deb, haut, fin = im in
-  [ (deb, haut) ]
+let rec nettoyer (hor : horizon) : horizon =
+  match hor with
+  | (x1, y1) :: (x2, y2) :: suite when x1 = x2 ->
+      nettoyer ((x1, max y1 y2) :: suite)
+  | (x1, y1) :: (x2, y2) :: suite when y1 = y2 -> nettoyer ((x1, y1) :: suite)
+  | point :: suite -> point :: nettoyer suite
+  | [] -> []
 
-let compare (im1 : immeuble) (im2 : immeuble) : int =
-  match (im1, im2) with
-  | (g1, h1, d1), (g2, h2, d2) ->
-      if g1 > g2 then 1 else if g1 < g2 then -1 else 0
+let rec fusion_horizons (hor1 : horizon) (hor2 : horizon) (h1 : int) (h2 : int)
+    : horizon =
+  match (hor1, hor2) with
+  | [], _ -> hor2
+  | _, [] -> hor1
+  | (x1, y1) :: suite1, (x2, y2) :: suite2 ->
+      if x1 < x2 then
+        let h_max = max y1 h2 in
+        (x1, h_max) :: fusion_horizons suite1 hor2 y1 h2
+      else if x1 > x2 then
+        let h_max = max h1 y2 in
+        (x2, h_max) :: fusion_horizons hor1 suite2 h1 y2
+      else (* x1 = x2 *)
+        let h_max = max y1 y2 in
+        (x1, h_max) :: fusion_horizons suite1 suite2 y1 y2
 
-let skyline (v : ville) : horizon =
-  let n = List.length v in
-  let vnew = List.sort compare v in
-  let rec aux (current : immeuble) (i : int) (v : ville) (hor : horizon) :
-      horizon =
-    if i = n then hor
-    else
-      match v with
-      | [] -> hor
-      | x :: xs ->
-          let g, h, d = x in
-          let gc, hc, dc = current in
-          if hc < h then aux (g, h, d) (i + 1) xs (immeuble_to_hor x @ hor)
-          else if dc = i then aux x (i + 1) xs hor
-          else if current = [] then
-          else aux current (i + 1) xs hor
-  in
-  let ans = aux (0, 0, 0) 0 vnew [] in
-  List.rev ans
+let rec skyline (v : ville) : horizon =
+  match v with
+  | [] -> []
+  | [ (g, h, d) ] -> [ (g, h); (d, 0) ]
+  | _ ->
+      let n = List.length v in
+      let rec separer lst i =
+        if i = 0 then ([], lst)
+        else
+          match lst with
+          | [] -> ([], [])
+          | x :: xs ->
+              let gauche, droite = separer xs (i - 1) in
+              (x :: gauche, droite)
+      in
+      let moitie1, moitie2 = separer v (n / 2) in
+
+      let h1 = skyline moitie1 in
+      let h2 = skyline moitie2 in
+
+      nettoyer (fusion_horizons h1 h2 0 0)
 
 let cas_vide : ville = []
 let cas_unique : ville = [ (2, 10, 9) ]
