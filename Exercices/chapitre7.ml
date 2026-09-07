@@ -1,4 +1,4 @@
-(** Exercice 7.2 *)
+(** Exercice 7.2 Cours*)
 
 type form =
   | V
@@ -56,3 +56,27 @@ let est_tautologie (f : form) (n : int) : bool =
     end
   in
   aux 0
+
+(** Exercice 7.1 *)
+
+(** On additionne 'ab' et 'cd', deux nombres de deux chiffres en binaires. Ainsi
+    'ab' + 'cd' = 'pqr' où 'pqr' est un nombre en binaire
+
+    r = b xor d *)
+
+(** Exercice 7.3 *)
+
+type proposition =
+  | Var of string
+  | Vrai
+  | Faux
+  | Neg of proposition
+  | Donc of proposition * proposition
+  | Et of proposition * proposition
+  | Ou of proposition * proposition
+
+type ifExpr =
+  | Var_ite of string
+  | Vrai_ite
+  | Faux_ite
+  | Ite of ifExpr * ifExpr * ifExpr
