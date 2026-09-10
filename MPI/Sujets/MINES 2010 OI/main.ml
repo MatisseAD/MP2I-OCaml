@@ -20,29 +20,53 @@ let satisfait_formule f value =
   done;
   !ans
 
-(** Principe de backtracking *)
+let transfo_f nbval_arr n =
+  let power2 = ref 1 in
+  let cpt = ref 0 in
+  let i = ref n in
+  let f = Array.make (n + 1) 0 in
+  f.(0) <- nbval_arr.(0);
+  for i = n downto 1 do
+    cpt := !cpt + (!power2 * nbval_arr.(i));
+    power2 := !power2 * 2
+  done;
+  if !cpt = !power2 - 1 then nbval_arr
+  else (
+    cpt := !cpt + 1;
+    while !cpt <> 0 && !i >= 1 do
+      let reste = !cpt mod 2 in
+      cpt := !cpt / 2;
+      f.(!i) <- reste;
+      decr i
+    done;
+    f)
 
-(** Problème à résoudre :
-
-    Si on a un cas [|1;1;1;1;1;1|] Et que cela ne marche pas, on ne revient pas
-    au début pour tester un truc du style :
-
-    [|1;1;0;1;1|] *)
-
-(** let rec resoudre_rec f value (k : int) : int array = if k = 0 then begin if
-    value.(0) <> 1 then begin value.(0) <- 1; resoudre_rec f value (f.(0).(1))
-    end else begin value.(0) <- 0; value end end else begin let nb_var =
-    f.(0).(1) in if satisfait_formule f value then value else if value.(k) = 1
-    && k <> nb_var then begin if value.( end **)
+let rec resoudre_rec f value : int array =
+  if value.(0) = 0 then value.(0) <- 1;
+  let n = f.(0).(1) in
+  if satisfait_formule f value then value
+  else
+    let r = transfo_f value n in
+    if r = value then begin
+      value.(0) <- 0;
+      value
+    end
+    else resoudre_rec f r
 
 let resoudre f : int array =
   let nb_val = f.(0).(1) in
-  let valeur = Array.make nb_val 0 in
-  resoudre_rec f valeur 0
+  let valeur = Array.make (nb_val+1) 0 in
+  resoudre_rec f valeur
 
-(** Q12) *)
+(** Q12) 
 
-(** Q13) *)
+La complexité est en O(m2^n)
+
+*)
+
+(** Q13)
+
+    cf. pdf *)
 
 (** Q14 *)
 
@@ -50,7 +74,7 @@ let place (c : int array) (litt : int) =
   let ans = ref (false, 0) in
   let n = c.(0) in
   for i = 1 to n do
-    if c.(i) = litt then ans := (true, i)
+    if c.(i) = litt || c.(i) = -litt then ans := (true, i)
   done;
   snd !ans
 
@@ -62,7 +86,7 @@ let supprimer_variable (c : int array) (i : int) =
 let supprimer_clause (f : int array array) (i : int) =
   let nb_clause = f.(0).(0) in
   f.(0).(0) <- nb_clause - 1;
-  f.(i).(0) <- f.(nb_clause).(0)
+  f.(i) <- f.(nb_clause)
 
 let calculer_diff (f : int array array) : int array =
   let n = f.(0).(1) in
@@ -76,5 +100,55 @@ let calculer_diff (f : int array array) : int array =
         | x when x < 0 -> ans.(litt) <- ans.(litt) - 1
         | _ -> ans.(litt) <- ans.(litt) + 1
     done
+  done;
+  ans
+
+let simplifier f alpha v =
+  let ans = ref 0 in
+  let litt = ref 0 in
+  if v = 1 then litt := alpha else litt := -alpha;
+  let nb_clause = f.(0).(0) in
+  let i = ref 1 in
+  while !i <> nb_clause do
+    let pi = place f.(!i) !litt in
+    if pi <> 0 then
+      if f.(!i).(pi) = !litt then (
+        incr ans;
+        supprimer_clause f !i
+        (** On n'incrémente pas i pour vérifier la nouvelle clause*)
+        )
+      else 
+        supprimer_variable f.(!i) pi;
+        incr i
+  done;
+  !ans
+
+let max_i tab n =
+  let i_max = ref 1 in
+  for i = 2 to n do
+    if abs tab.(!i_max) < abs tab.(i) then i_max := i
+  done;
+  !i_max
+
+(** Si :
+
+    - La clause est supprimé puisque la variable est égal à 1 => + 1 au cpt car
+      la clause est satisfaite
+    - Sinon ne rien faire *)
+
+let heuristique f =
+  let nb_var = f.(0).(1) in
+  let n = nb_var + 1 in
+  let ans = Array.make (nb_var + 1) 0 in
+  let diff = calculer_diff f in
+  let i = ref 1 in
+  while !i <> nb_var do
+    let j = ref (max_i diff n) in
+    let v = if diff.(!j) < 0 then -1 else 1 in
+    let c = simplifier f !j v in
+    ans.(!j) <- c;
+    ans.(0) <- ans.(0) + c;
+    diff.(!j) <- min_int;
+    incr i
   done;
   ans
