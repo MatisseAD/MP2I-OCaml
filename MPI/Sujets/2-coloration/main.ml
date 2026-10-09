@@ -137,3 +137,144 @@ let est_3_coloriable (g : graphe) =
         else ans := true
   done;
   !res
+
+
+(** Réduction 3-sat vers 3-color *)
+
+
+type clause = int * int * int
+
+type formule = clause list
+
+type sat_graphe = int list array
+
+
+let nb_litt (f : formule) : int =
+  let rec aux (f : formule) (cpt : int) : int =
+    match f with
+    | [] -> cpt
+    | (l1,l2,l3) :: xs ->
+      aux xs (max cpt (max (max (abs l1) (abs l2)) (abs l3)))
+    in aux f 0
+
+let nb_clause (f : formule) = List.length f
+
+let est3_coloriable_sat (g : sat_graphe) =
+  let n = Array.length g in
+  let graphe : graphe = (n, g) in
+  est_3_coloriable graphe
+
+let sat_vers_coloriable (f : formule) =
+
+  let nblitt = nb_litt f in
+  let nbclause = nb_clause f in
+  let nbsommet = 6*nbclause + 2*nblitt + 3 in
+let graphe : sat_graphe = Array.init nbsommet (fun _ -> []) in  
+let get_indice_litt (l : int) : int =
+    if l >= 0 then 2*(l-1) else 2*(abs l - 1) + 1
+  in
+  (**
+  On considère que les 2*(nbclause-1) première case comme les cases réservées aux sommets qui représentent les littéraux et leur négation
+
+  Exemple :
+  Case 0 : x0
+  Case 1 : ¬x0
+  Case 2 : x1
+  Case 3 : ¬x1
+  ...
+  *)
+
+  (**
+  On relie les arêtes xi et ¬xi entre elles
+  *)
+
+  let rec relier_x_et_non_x (g : sat_graphe) (cpt : int) =
+    if cpt > 2 * (nblitt) - 1 then
+      ()
+    else if cpt mod 2 = 0 then (
+      g.(cpt) <- (cpt + 1) :: g.(cpt);
+      relier_x_et_non_x g (cpt + 1)
+    ) else (
+      g.(cpt) <- (cpt - 1) :: g.(cpt);
+      relier_x_et_non_x g (cpt + 1)
+    )
+  in
+  relier_x_et_non_x graphe 0;
+      
+  (**
+  1. Le triangle de référence (La Palette)
+  On commence par créer un triangle de base avec 3 sommets spéciaux reliés deux à deux : 
+  Un sommet Vrai (True / T) -> graphe.(2*nblitt)
+  Un sommet Faux (False / F) -> graphe.(2*nblitt+1)
+  Un sommet Base (Neutre / N) -> graphe.(2*nblitt+2)
+  Ces trois sommets doivent recevoir des couleurs distinctes dans toute 3-coloration valide. Ils servent de référence pour attribuer les valeurs de vérité.
+  **)
+
+  (** On relie les arêtes du triangle de référence *)
+  graphe.(2*nblitt) <- (2*nblitt+1) :: (2*nblitt+2) :: graphe.(2*nblitt);
+  graphe.(2*nblitt+1) <- (2*nblitt) :: (2*nblitt+2) :: graphe.(2*nblitt+1);
+  graphe.(2*nblitt+2) <- (2*nblitt) :: (2*nblitt+1) :: graphe.(2*nblitt+2);
+
+  (** On relie toutes les arrêtes au sommet Base *)
+  let rec relier_aretes_to_sommet_base (g : sat_graphe) (cpt : int) =
+    if cpt > 2*(nblitt) - 1 then ()
+    else
+      g.(cpt) <- 2*nblitt+2 :: g.(cpt);
+      g.(2*nblitt+2) <- cpt :: g.(2*nblitt+2);
+      relier_aretes_to_sommet_base g (cpt + 1)
+  in 
+  let _ = relier_aretes_to_sommet_base graphe 0 in
+
+  (**
+  
+  3. "Gadget" pour les clauses
+  Pour chaque clause C_j = (a v b v c) où a, b, c sont des littéraux, on construit un sous-graphe spécifique appelé gadget de clause.
+Ce gadget possède trois sommets d'entrée correspondant aux littéraux a, b et c, et un sommet de sortie.
+Le sommet de sortie du gadget est relié à la fois au sommet Faux et au sommet Base.
+-> Propriété logique du gadget :
+    Si les trois littéraux a, b, c sont colorés à la couleur Faux, il est impossible de 3-colorer le gadget de manière à ce que les contraintes soient respectées (cela force une contradiction avec le sommet Faux/Base).
+    Dès qu'au moins un des littéraux a, b ou c est coloré Vrai, il existe toujours une 3-coloration valide pour ce sous-graphe.
+  *)
+
+  (**
+  
+  Représentation des gadgets :
+  
+  La clause c0 associé au gadget 0 pour le littéral l0 de c0 est à la case g.(nblitt+3)
+  La clause c0 associé au gadget 0 pour le littéral l1 de c0 est à la case g.(nblitt+4)
+  Le troisième sommet du gadget 0 de c0 est associé à la case g.(nblitt+5)
+  La clause c0 associé au gadget 1 pour le littéral (l1,l2), (donc le troisième sommet du gadget 0) de c0 est à la case g.(nblitt+6)
+  La clause c0 associé au gadget 1 pour le littéral l2 de c0 est à la case g.(nblitt+7)
+  Le sommet "final" du gadget 1 de c0 est à la case g.(nblitt+8)
+  *)
+  let rec creer_gadget (f : formule) (g : sat_graphe) (cpt : int) : unit =
+    
+    match f with
+    | [] -> ()
+    | (i1,i2,i3) :: xs ->
+      let l0 = get_indice_litt i1 in
+      let l1 = get_indice_litt i2 in
+      let l2 = get_indice_litt i3 in
+      g.(2*nblitt+3+cpt) <- l0 :: g.(2*nblitt+3+cpt);
+      g.(l0) <- (2*nblitt+3+cpt) :: g.(l0);
+      g.(2*nblitt+4+cpt) <- l1 :: g.(2*nblitt+4+cpt);
+      g.(l1) <- (2*nblitt+4+cpt) :: g.(l1);
+      g.(2*nblitt+5+cpt) <- (2*nblitt+3+cpt) :: (2*nblitt+4+cpt) :: g.(2*nblitt+5+cpt);
+      g.(2*nblitt+3+cpt) <- (2*nblitt+5+cpt) :: g.(2*nblitt+3+cpt);
+      g.(2*nblitt+4+cpt) <- (2*nblitt+5+cpt) :: g.(2*nblitt+4+cpt);
+      g.(2*nblitt+5+cpt) <- (2*nblitt+6+cpt) :: (2*nblitt+7+cpt) :: g.(2*nblitt+5+cpt);
+      g.(2*nblitt+6+cpt) <- 2*nblitt+5+cpt :: g.(2*nblitt+6+cpt);
+      g.(2*nblitt+7+cpt) <- l2 :: g.(2*nblitt+7+cpt);
+      g.(l2) <- (2*nblitt+7+cpt) :: g.(l2);
+      g.(2*nblitt+8+cpt) <- (2*nblitt+6+cpt) :: (2*nblitt+7+cpt) :: g.(2*nblitt+8+cpt);
+      g.(2*nblitt+6+cpt) <- (2*nblitt+8+cpt) :: g.(2*nblitt+6+cpt);
+      g.(2*nblitt+7+cpt) <- (2*nblitt+8+cpt) :: g.(2*nblitt+7+cpt);
+      (** On relie le sommet de sortie du gadget au noeud base et faux*)
+      g.(2*nblitt+8+cpt) <- (2*nblitt+1) :: (2*nblitt+2) :: g.(2*nblitt+8+cpt);
+      g.(2*nblitt+1) <- (2*nblitt+8+cpt) :: g.(2*nblitt+1);
+      g.(2*nblitt+2) <- 2*nblitt+8+cpt :: g.(2*nblitt+2);
+      creer_gadget xs g (cpt+6);
+  in creer_gadget f graphe 0;
+  est3_coloriable_sat graphe;
+
+
