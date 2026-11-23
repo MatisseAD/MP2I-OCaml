@@ -119,3 +119,18 @@ let graphe_exp =
     [];
     [ (0, 5); (2, 5); (1, 6) ];
   |]
+
+(*f*)
+
+(** Idée de construction pour avoir une complexité linéaire
+
+    Soit |t| = n et h = [log2(n)]
+
+    Les feuilles sont à partir de i=2^h-2+1=2^h-1
+
+    Pour k de h-1 à 0 On percole les noeuds des niveaux ves le haut bas
+
+    Complexité : 2^k noeuds * O(h-k)
+
+    C(n) = sum(k=0 to h-1) = 2^k*O(h-k) *)
+x
